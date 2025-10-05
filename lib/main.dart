@@ -1,0 +1,32 @@
+import 'package:flutter/material.dart';
+import 'package:my_weather/di/di.dart';
+import 'package:my_weather/presentation/screen/daily_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+void main() {
+  setup();
+  runApp(
+    const ProviderScope(   // <<< ต้องมีตรงนี้
+      child: AppNavHost(),
+    ),
+  );
+}
+
+
+class AppNavHost extends StatelessWidget {
+  const AppNavHost({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.blue, // สีหลัก
+          scaffoldBackgroundColor: Colors.grey[200], // พื้นหลังของทุกหน้า
+          textTheme: const TextTheme(
+            bodyMedium: TextStyle(fontSize: 18, color: Colors.black87),
+          ),
+        ),
+        home: const DailyScreen(title: 'Flutter Demo Home'));
+  }
+}

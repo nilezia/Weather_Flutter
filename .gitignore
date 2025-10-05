@@ -1,0 +1,39 @@
+# Flutter / Dart
+.dart_tool/
+.buildlog/
+.packages
+.pub-cache/
+pubspec.lock
+build/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VS Code
+.vscode/
+
+# Mac
+.DS_Store
+
+# C/C++ Build Artifacts
+*.o
+*.obj
+*.so
+*.dll
+*.exe
+*.out
+*.a
+*.lib
+*.lo
+*.la
+*.pch
+
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.cmake.user
+*.cbp
+_build/
