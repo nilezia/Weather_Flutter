@@ -37,3 +37,6 @@ Makefile
 *.cmake.user
 *.cbp
 _build/
+windows
+macos
+linux
