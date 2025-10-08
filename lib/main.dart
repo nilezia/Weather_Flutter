@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:my_weather/di/di.dart';
 import 'package:my_weather/presentation/screen/daily_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+Future<void> main() async{
   setup();
+  await dotenv.load(fileName: ".env"); // โหลดไฟล์ .env
   runApp(
     const ProviderScope(   // <<< ต้องมีตรงนี้
       child: AppNavHost(),

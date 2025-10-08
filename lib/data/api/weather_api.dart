@@ -1,10 +1,11 @@
 import 'dart:convert';
 import '../model/weather_response.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class WeatherApi {
   final String baseUrl = "https://api.openweathermap.org/";
-  final String apiKey = "";
+  final String apiKey = dotenv.env['API_KEY'] ?? "";
 
   Future<WeatherResponse> getWeather(double lat, double lng) async {
     final response = await http.get(
