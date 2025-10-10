@@ -22,8 +22,6 @@ class WeatherApi {
   }
 
   Future<ForecastResponse> getForecast(double lat, double lng) async {
-    print(apiKey);
-
     final response = await http.get(
       Uri.parse("${baseUrl}data/2.5/forecast?lat=$lat&lon=$lng&appid=$apiKey&units=metric"),
     );
