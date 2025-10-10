@@ -17,6 +17,7 @@ class _DailyScreenState extends ConsumerState<DailyScreen> {
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(weatherNotifierProvider.notifier).loadWeather(13.7563, 100.5018);
+      ref.read(weatherNotifierProvider.notifier).loadForecastWeather(13.7563, 100.5018);
     });
     super.initState();
   }
@@ -176,7 +177,37 @@ class _DailyScreenState extends ConsumerState<DailyScreen> {
   }
 
   Widget cardForecast(WeatherState state) {
-    return Container();
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: EdgeInsets.zero,
+      child: ListView.builder(
+        itemCount: state.forecastWeatherUi.weathers.length,
+        shrinkWrap: true, // ✅ ให้ขนาดตามจำนวนลูก
+        physics: const NeverScrollableScrollPhysics(), // ✅ ไม่ให้ scroll ซ้อน
+        padding: EdgeInsets.zero,
+        itemBuilder: (context, index) {
+          final item = state.forecastWeatherUi.weathers[index];
+          return Card(
+            color: Colors.white.withOpacity(0.8),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: ListTile(
+              leading: Image.network(
+                item.iconUrl ?? "",
+                width: 50,
+                height: 50,
+              ),
+              title: Text(item.mainWeather ?? ""),
+              subtitle: Text(
+                "${item.description}\nTemp: ${item.temperature}°C | Humidity: ${item.humidity}%",
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Widget dailyScreenWidget(WeatherState state) {
@@ -221,6 +252,8 @@ class _DailyScreenState extends ConsumerState<DailyScreen> {
                     temperatureWidget(state),
                     SizedBox(height: 16),
                     cardWind(state),
+                    SizedBox(height: 16),
+                    cardForecast(state),
                   ],
                 ),
               ),
