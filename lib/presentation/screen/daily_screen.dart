@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:my_weather/presentation/viewmodel/weather_notifier.dart';
 
 class DailyScreen extends ConsumerStatefulWidget {
@@ -15,11 +16,18 @@ class DailyScreen extends ConsumerStatefulWidget {
 class _DailyScreenState extends ConsumerState<DailyScreen> {
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(weatherNotifierProvider.notifier).loadWeather(13.7563, 100.5018);
-      ref.read(weatherNotifierProvider.notifier).loadForecastWeather(13.7563, 100.5018);
-    });
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        final location = await getCurrentLocation();
+        ref.read(weatherNotifierProvider.notifier).loadWeather(location.latitude, location.longitude);
+        ref.read(weatherNotifierProvider.notifier).loadForecastWeather(location.latitude, location.longitude);
+      }catch (e) {
+        debugPrint("❌ Error getting location: $e");
+      }
+
+    });
+
   }
 
   @override
@@ -51,7 +59,7 @@ class _DailyScreenState extends ConsumerState<DailyScreen> {
         ),
         SizedBox(height: 8),
         Text(
-          style: TextStyle(color: Colors.white, fontSize: 32),
+          style: TextStyle(color: Colors.white, fontSize: 48),
           "${state.dailyWeatherUi.weatherUi.temperature}°C",
         ),
         SizedBox(height: 8),
@@ -218,7 +226,7 @@ class _DailyScreenState extends ConsumerState<DailyScreen> {
         backgroundColor: Colors.transparent,
         title: Text(
           style: const TextStyle(color: Colors.white, fontSize: 24),
-          "หนองจอก",
+          "${state.dailyWeatherUi.city}",
         ),
       ),
       body: Container(
@@ -263,46 +271,77 @@ class _DailyScreenState extends ConsumerState<DailyScreen> {
       ),
     );
   }
-}
 
-Widget errorWidget(WeatherState state, BuildContext context) {
-  return Scaffold(
-    extendBodyBehindAppBar: true,
-    appBar: AppBar(
-      elevation: 0,
-      backgroundColor: Colors.transparent,
-      title: Text(
-        style: const TextStyle(color: Colors.white, fontSize: 24),
-        "Something went wrong",
-      ),
-    ),
-    body: Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Color(0xFF90CAF9), // ฟ้าอ่อน
-            Color(0xFF2196F3), // ฟ้าเข้ม
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
+  Widget errorWidget(WeatherState state, BuildContext context) {
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        title: Text(
+          style: const TextStyle(color: Colors.white, fontSize: 24),
+          "Something went wrong",
         ),
       ),
-      child: Padding(
-        padding: EdgeInsets.only(
-          top: kToolbarHeight + MediaQuery.of(context).padding.top,
-          left: 16,
-          right: 16,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF90CAF9), // ฟ้าอ่อน
+              Color(0xFF2196F3), // ฟ้าเข้ม
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [Text("${state.error}")],
+          padding: EdgeInsets.only(
+            top: kToolbarHeight + MediaQuery.of(context).padding.top,
+            left: 16,
+            right: 16,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [Text("${state.error}")],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
+
+  Future<Position> getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // ตรวจสอบว่าเปิด Location service อยู่ไหม
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      throw Exception('Location services are disabled.');
+    }
+
+    // ตรวจสอบ permission
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        throw Exception('Location permission denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      throw Exception('Location permission permanently denied');
+    }
+
+    // ได้ permission แล้ว → ดึงตำแหน่ง
+    return await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+  }
 }
+
+
